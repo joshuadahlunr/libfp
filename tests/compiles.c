@@ -1,6 +1,7 @@
 #define FP_IMPLEMENTATION
 #include <fp/pointer.h>
 #include <fp/dynarray.h>
+#include <fp/string.h>
 
 // void* __heap_end;
 
@@ -47,7 +48,7 @@ void check_view(void) {
 }
 
 void check_dynarray(void) {
-	fp_dynarray(int) arr = nullptr;
+	fp_dynarray(int) arr = NULL;
 	fpda_reserve(arr, 20);
 	assert_with_side_effects(fpda_capacity(arr) == 0); // NOTE: FPDAs aren't valid until they have had at least one element added!
 	assert_with_side_effects(fpda_size(arr) == 0);
@@ -106,4 +107,39 @@ void check_dynarray(void) {
 
 	fpda_free(arr);
 	fpda_free(arr2);
+}
+
+void check_string(void) {
+	fp_string str = fp_string_promote_literal("Hello World");
+	assert(is_fp(str));
+	assert(is_fpda(str));
+	assert(!fp_is_stack_allocated(str));
+	assert(fp_is_heap_allocated(str));
+	assert(fpda_size(str) == 11);
+	assert(fp_string_compare(str, str) == 0);
+	assert(str[fp_string_length(str)] == 0); // fp_strings are null terminated!
+
+	fp_string concat = fp_string_concatenate(str, "!");
+	assert(fp_string_compare(str, concat) < 0);
+	assert(fp_string_compare(concat, str) > 0);
+	assert(fp_string_compare(concat, "Hello World!") == 0);
+	fp_string_concatenate_inplace(concat, " bob");
+	assert(fp_string_compare(concat, "Hello World! bob") == 0);
+	fp_string_free(concat);
+	// printf("%s\n", concat);
+
+	fp_string concatN = fp_string_concatenate_n(4, "Hello", " ", "World", "!");
+	assert(fp_string_compare(concatN, "Hello World!"));
+	fp_string_free(concatN);
+
+	fp_string clone = fp_string_make_dynamic(str);
+	fp_string append = fp_string_append(clone, '!');
+	assert(fp_string_compare(append, "Hello World!") == 0);
+	fp_string_free(append);
+
+	fp_string fmt = fp_string_format("%s %s%c\n", "Hello", "World", '!');
+	assert(fp_string_compare(fmt, "Hello World!\n") == 0);
+	fp_string_free(fmt);
+
+	fp_string_free(str);
 }

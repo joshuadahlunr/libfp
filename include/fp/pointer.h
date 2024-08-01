@@ -72,7 +72,8 @@ extern "C" {
 enum FP_MagicNumbers {
 	FP_MAGIC_NUMBER = 0xFE00,
 	FP_HEAP_MAGIC_NUMBER = 0xFEFE,
-	FP_STACK_MAGIC_NUMBER = 0xFEFF
+	FP_STACK_MAGIC_NUMBER = 0xFEFF,
+	FP_DYNARRAY_MAGIC_NUMBER = 0xFEFD,
 };
 
 struct __FatPointerHeader {
@@ -224,7 +225,7 @@ bool fp_is_stack_allocated(const void* p)
 bool fp_is_heap_allocated(const void* p)
 #ifdef FP_IMPLEMENTATION
 {
-	return fp_magic_number(p) == FP_HEAP_MAGIC_NUMBER;
+	return fp_magic_number(p) == FP_HEAP_MAGIC_NUMBER || fp_magic_number(p) == FP_DYNARRAY_MAGIC_NUMBER;
 }
 #else
 ;

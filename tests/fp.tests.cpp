@@ -8,12 +8,14 @@
 
 #include <fp/pointer.h>
 #include <fp/dynarray.h>
+#include <fp/string.h>
 
 extern "C" {
 void check_stack();
 void check_heap();
 void check_view();
 void check_dynarray();
+void check_string();
 }
 
 #define DISCARD_RESULT (void)
@@ -296,12 +298,48 @@ TEST_SUITE("LibFP") {
 		fpda_free(arr);
 	}
 
+	TEST_CASE("String") {
+		fp_string str = fp_string_promote_literal("Hello World");
+		CHECK(is_fp(str));
+		CHECK(is_fpda(str));
+		CHECK(!fp_is_stack_allocated(str));
+		CHECK(fp_is_heap_allocated(str));
+		CHECK(fpda_size(str) == 11);
+		CHECK(fp_string_compare(str, str) == 0);
+		CHECK(str[fp_string_length(str)] == 0); // fp_strings are null terminated!
+
+		auto concat = fp_string_concatenate(str, "!");
+		CHECK(fp_string_compare(str, concat) < 0);
+		CHECK(fp_string_compare(concat, str) > 0);
+		CHECK(fp_string_compare(concat, "Hello World!") == 0);
+		fp_string_concatenate_inplace(concat, " bob");
+		CHECK(fp_string_compare(concat, "Hello World! bob") == 0);
+		fp_string_free(concat);
+		// printf("%s\n", concat);
+
+		fp_string concatN = fp_string_concatenate_n(4, "Hello", " ", "World", "!");
+		CHECK(fp_string_compare(concatN, "Hello World!"));
+		fp_string_free(concatN);
+
+		auto clone = fp_string_make_dynamic(str);
+		auto append = fp_string_append(clone, '!');
+		CHECK(fp_string_compare(append, "Hello World!") == 0);
+		fp_string_free(append);
+
+		auto fmt = fp_string_format("%s %s%c\n", "Hello", "World", '!');
+		CHECK(fp_string_compare(fmt, "Hello World!\n") == 0);
+		fp_string_free(fmt);
+
+		fp_string_free(str);
+	}
+
 #if !(defined _MSC_VER || defined __APPLE__)
 	TEST_CASE("C") {
 		check_stack();
 		check_heap();
 		check_view();
 		check_dynarray();
+		check_string();
 	}
 #endif
 }

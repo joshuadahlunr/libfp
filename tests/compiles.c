@@ -2,6 +2,7 @@
 #include <fp/pointer.h>
 #include <fp/dynarray.h>
 #include <fp/string.h>
+#include <fp/hash.h>
 
 // void* __heap_end;
 
@@ -142,4 +143,59 @@ void check_string(void) {
 	fp_string_free(fmt);
 
 	fp_string_free(str);
+}
+
+void check_hash(void) {
+	{
+		assert_with_side_effects(fp_hash_elements_to_skip(int) == 2);
+		int* hashtable = nullptr;
+
+		int key = 5;
+		assert_with_side_effects(*fp_hash_insert(int, hashtable, key) == key);
+		key = 6;
+		assert_with_side_effects(*fp_hash_insert_or_replace(int, hashtable, key) == key);
+		assert_with_side_effects(*fp_hash_insert_or_replace(int, hashtable, key) == key);
+
+		assert_with_side_effects(*fp_hash_find(int, hashtable, key) == key);
+		key = 5;
+		assert_with_side_effects(*fp_hash_find(int, hashtable, key) == key);
+		key = 4;
+		assert_with_side_effects(fp_hash_find(int, hashtable, key) == nullptr);
+
+		fp_hash_double_size_and_rehash(int, hashtable, false);
+		key = 6;
+		assert_with_side_effects(*fp_hash_find(int, hashtable, key) == key);
+		key = 5;
+		assert_with_side_effects(*fp_hash_find(int, hashtable, key) == key);
+		key = 4;
+		assert_with_side_effects(fp_hash_find(int, hashtable, key) == nullptr);
+
+		fp_hash_free(hashtable);
+	}
+	{
+		assert_with_side_effects(fp_hash_elements_to_skip(int) == 2);
+		int* hashtable = nullptr;
+
+		int key = 5;
+		assert_with_side_effects(*fp_hash_insert_store_hashes(int, hashtable, key, true) == key);
+		key = 6;
+		assert_with_side_effects(*fp_hash_insert_or_replace(int, hashtable, key) == key);
+		assert_with_side_effects(*fp_hash_insert_or_replace(int, hashtable, key) == key);
+
+		assert_with_side_effects(*fp_hash_find(int, hashtable, key) == key);
+		key = 5;
+		assert_with_side_effects(*fp_hash_find(int, hashtable, key) == key);
+		key = 4;
+		assert_with_side_effects(fp_hash_find(int, hashtable, key) == nullptr);
+
+		fp_hash_double_size_and_rehash(int, hashtable, false);
+		key = 6;
+		assert_with_side_effects(*fp_hash_find(int, hashtable, key) == key);
+		key = 5;
+		assert_with_side_effects(*fp_hash_find(int, hashtable, key) == key);
+		key = 4;
+		assert_with_side_effects(fp_hash_find(int, hashtable, key) == nullptr);
+
+		fp_hash_free(hashtable);
+	}
 }

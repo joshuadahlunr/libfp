@@ -9,6 +9,7 @@
 #include <fp/pointer.h>
 #include <fp/dynarray.h>
 #include <fp/string.h>
+#include <fp/hash.h>
 
 extern "C" {
 void check_stack();
@@ -16,6 +17,7 @@ void check_heap();
 void check_view();
 void check_dynarray();
 void check_string();
+void check_hash();
 }
 
 #define DISCARD_RESULT (void)
@@ -333,6 +335,76 @@ TEST_SUITE("LibFP") {
 		fp_string_free(str);
 	}
 
+	TEST_CASE("Hash") {
+		CHECK(fp_hash_elements_to_skip(int) == 2);
+		int* hashtable = nullptr;
+
+		int key = 5;
+		CHECK(*fp_hash_insert(int, hashtable, key) == key);
+		key = 6;
+		CHECK(*fp_hash_insert_or_replace(int, hashtable, key) == key);
+		CHECK(*fp_hash_insert_or_replace(int, hashtable, key) == key);
+
+		CHECK(*fp_hash_find(int, hashtable, key) == key);
+		key = 5;
+		CHECK(*fp_hash_find(int, hashtable, key) == key);
+		key = 4;
+		CHECK(fp_hash_find(int, hashtable, key) == nullptr);
+
+		fp_hash_double_size_and_rehash(int, hashtable, false);
+		key = 6;
+		CHECK(*fp_hash_find(int, hashtable, key) == key);
+		key = 5;
+		CHECK(*fp_hash_find(int, hashtable, key) == key);
+		key = 4;
+		CHECK(fp_hash_find(int, hashtable, key) == nullptr);
+
+		fp_hash_free(hashtable);
+	}
+
+	TEST_CASE("Hash::StoreHashes") {
+		CHECK(fp_hash_elements_to_skip(int) == 2);
+		int* hashtable = nullptr;
+
+		int key = 5;
+		CHECK(*fp_hash_insert_store_hashes(int, hashtable, key, true) == key);
+		key = 6;
+		CHECK(*fp_hash_insert_or_replace(int, hashtable, key) == key);
+		CHECK(*fp_hash_insert_or_replace(int, hashtable, key) == key);
+
+		CHECK(*fp_hash_find(int, hashtable, key) == key);
+		key = 5;
+		CHECK(*fp_hash_find(int, hashtable, key) == key);
+		key = 4;
+		CHECK(fp_hash_find(int, hashtable, key) == nullptr);
+
+		fp_hash_double_size_and_rehash(int, hashtable, false);
+		key = 6;
+		CHECK(*fp_hash_find(int, hashtable, key) == key);
+		key = 5;
+		CHECK(*fp_hash_find(int, hashtable, key) == key);
+		key = 4;
+		CHECK(fp_hash_find(int, hashtable, key) == nullptr);
+
+		fp_hash_free(hashtable);
+	}
+
+	TEST_CASE("Hash::Array2Hash") {
+		int* arr = fp_alloca(int, 5);
+		arr[0] = 1; arr[1] = 3; arr[2] = 5; arr[3] = 2; arr[4] = 7;
+
+		int* hashtable = fp_hash_convert_array(int, arr);
+		CHECK(hashtable != nullptr);
+
+		int key;
+		fp_iterate(arr) {
+			key = *i;
+			CHECK(*fp_hash_find(int, hashtable, key) == key);
+		}
+		key = 4;
+		CHECK(fp_hash_find(int, hashtable, key) == nullptr);
+	}
+
 #if !(defined _MSC_VER || defined __APPLE__)
 	TEST_CASE("C") {
 		check_stack();
@@ -340,6 +412,7 @@ TEST_SUITE("LibFP") {
 		check_view();
 		check_dynarray();
 		check_string();
+		check_hash();
 	}
 #endif
 }

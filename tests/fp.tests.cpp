@@ -9,7 +9,7 @@
 #include <fp/pointer.h>
 #include <fp/dynarray.h>
 #include <fp/string.h>
-#include <fp/hash.h>
+#include <fp/hash/table.h>
 
 extern "C" {
 void check_stack();
@@ -461,6 +461,8 @@ TEST_SUITE("LibFP") {
 		}
 		key = 4;
 		CHECK(fp_hash_find(int, hashtable, key) == nullptr);
+
+		fp_hash_free(hashtable);
 	}
 
 #if !(defined _MSC_VER || defined __APPLE__)

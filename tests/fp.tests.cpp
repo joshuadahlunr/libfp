@@ -9,7 +9,7 @@
 #include <fp/pointer.h>
 #include <fp/dynarray.h>
 #include <fp/string.h>
-#include <fp/hash.h>
+#include <fp/hash/table.h>
 
 extern "C" {
 void check_stack();

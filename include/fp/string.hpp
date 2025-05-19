@@ -9,7 +9,16 @@
 	#include <string_view>
 #endif
 
-#if __cpp_lib_format >= 201907L
+#ifndef FP_FORMAT_SUPPORT
+	#if __cpp_lib_format >= 201907L
+		#define FP_FORMAT_SUPPORT
+	#endif
+	#ifdef _LIBCPP_FORMAT
+		#define FP_FORMAT_SUPPORT
+	#endif
+#endif
+
+#ifdef FP_FORMAT_SUPPORT
 	#include <format>
 	#include <string_view>
 #endif
@@ -65,7 +74,7 @@ namespace fp {
 			return s << const_cast<string_view&>(view).to_std();
 		}
 #endif
-#if __cpp_lib_format >= 201907L
+#ifdef FP_FORMAT_SUPPORT
 		friend std::formatter<string_view, char>;
 #endif
 	};
@@ -147,7 +156,7 @@ namespace fp {
 			return s << str.derived()->data();
 		}
 #endif
-#if __cpp_lib_format >= 201907L
+#ifdef FP_FORMAT_SUPPORT
 		friend std::formatter<string_crtp_common, char>;
 #endif
 
@@ -200,7 +209,7 @@ namespace fp {
 			return replace_inplace(find.to_view(), replace.to_view(), start);
 		}
 
-#if __cpp_lib_format >= 201907L
+#ifdef FP_FORMAT_SUPPORT
 		Derived c_format(...) const {
 			va_list args;
 			va_start(args, ptr());
@@ -324,7 +333,7 @@ namespace fp {
 		};
 	}
 
-#if __cpp_lib_format >= 201907L
+#ifdef FP_FORMAT_SUPPORT
 	namespace builder {
 		struct string: public raii::string {
 			using raii = raii::string;
@@ -370,7 +379,7 @@ namespace fp {
 #endif
 }
 
-#if __cpp_lib_format >= 201907L
+#ifdef FP_FORMAT_SUPPORT
 namespace std {
 	// template<typename Derived, typename Dynamic>
 	// struct formatter<fp::string_view, char> : public formatter<std::string_view, char> {

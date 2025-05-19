@@ -348,9 +348,9 @@ struct __fp_view {
 #define fp_view_literal(type, data, size) (fp_view(type){(type*)(data), (size)})
 using fp_void_view = fp_view(void);
 
-#if !(defined _MSC_VER || defined __APPLE__)
+// #if !(defined _MSC_VER || defined __APPLE__)
 extern "C" {
-#endif // _MSC_VER || __APPLE__
+// #endif // _MSC_VER || __APPLE__
 #else
 struct __fp_view {
 	void* data;
@@ -449,9 +449,9 @@ inline bool static fp_view_swap(fp_void_view a, fp_void_view b) FP_NOEXCEPT {
 #define fp_view_iterate(type, view) fp_view_iterate_named(type, (view), i)
 #define fp_view_iterate_calculate_index(type, view, i) ((i) - fp_view_data(type, view))
 
-#if (defined __cplusplus) && !(defined _MSC_VER || defined __APPLE__)
+// #if (defined __cplusplus) && !(defined _MSC_VER || defined __APPLE__)
 }
-#endif // __cplusplus && !_MSC_VER
+// #endif // __cplusplus && !_MSC_VER
 
 #if defined(__cpp_lib_span) && __cpp_lib_span >= 202002L
 template<typename T>
